@@ -1,5 +1,19 @@
 # The Task
 
+## Start here
+
+Boot the app (see `README.md`), then open the **interactive API docs at
+<http://localhost:8000/docs>** (or <http://localhost:8000/redoc> for a reading view).
+That's the best single map of what's available — it lists, documents, and lets you *try*
+every endpoint:
+
+- **Email intake (entry point)** — `POST /inbound/email/`, where an email comes in.
+- **Make a call (exit point)** — `POST /debug/call/`, which places a real call.
+- **Discovery** — `GET /agents/` and `GET /phone-numbers/`: the AI agents and phone
+  numbers wired up for you. Each agent lists the `{{ merge_variables }}` its script
+  expects — that's the contract for what to pass in `make_call(variables=...)`.
+- **Mock CRM** — `GET /mock-crm/orders/` (list) and `GET /mock-crm/orders/{id}/` (lookup).
+
 ## The scenario
 
 Emails arrive about deliveries. When one comes in, we want to **automatically call the
@@ -19,13 +33,17 @@ The two ends of the pipe are already built and working:
 
 2. **An outbound call function** — `make_call(target_number=..., variables={...})` in
    `app/vapi.py`. Call it and a real phone rings; the AI agent answers using the
-   `variables` you pass (they're available in its script as `{{order_number}}`,
-   `{{contact_name}}`, etc.).
+   `variables` you pass. Each agent expects specific `{{ merge_variables }}` — check
+   `GET /agents/` to see exactly which, and map the CRM fields onto them.
 
 You also have a **mock CRM** to enrich emails with order data:
 `GET /mock-crm/orders/{order_id}/` returns a contact name, phone, status, delivery
 window, and address. Try `ORD-12345` and `ORD-67890` (and `ORD-ERROR` / `ORD-SLOW` if you
-want to test failure handling).
+want to test failure handling), or `GET /mock-crm/orders/` to list them.
+
+To see everything that's wired up — the agents (and the variables each expects) and the
+phone numbers you can call from — use the discovery endpoints `GET /agents/` and
+`GET /phone-numbers/`, or just browse <http://localhost:8000/docs>.
 
 ## What to build
 
@@ -43,12 +61,13 @@ that pass data from one to the next. How a workflow is defined, stored, and exec
 your design. We're interested in how you model the problem, not in a single hard-coded
 `if` statement.
 
-## Two agents are available
+## Three agents are available
 
-There are **two** pre-configured agent / phone-number pairs (`..._1` and `..._2` in
-`.env`). `make_call` uses pair 1 by default; pass `assistant_id` / `phone_number_id` to
-use pair 2. Consider letting your engine **route to a different agent** based on the
-email (e.g. urgency, order status) — a nice way to show branching.
+There are **three** pre-configured agents and **two** phone numbers (see `GET /agents/`
+and `GET /phone-numbers/`). `make_call` uses the first agent + first number by default;
+pass `assistant_id` / `phone_number_id` to choose another. The agents cover different
+scenarios (e.g. delivery completed vs. delayed, driver vs. customer), so your engine
+should **route to the right agent** based on the email — a nice way to show branching.
 
 ## Out of scope
 

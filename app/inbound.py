@@ -28,11 +28,30 @@ class InboundEmail(BaseModel):
     body: str
     to: str = "orders@interview.test"
 
-    model_config = {"populate_by_name": True}
+    model_config = {
+        "populate_by_name": True,
+        "json_schema_extra": {
+            "example": {
+                "from": "dispatch@partner.com",
+                "subject": "Delivery update ORD-12345",
+                "body": "Order ORD-12345 is out for delivery today.",
+            }
+        },
+    }
 
 
-@router.post("/inbound/email/")
+@router.post(
+    "/inbound/email/",
+    tags=["Email intake (entry point)"],
+    summary="Receive an email (the ENTRY POINT)",
+)
 async def inbound_email(email: InboundEmail) -> dict:
+    """The entry point of the whole exercise.
+
+    An email arrives here as JSON (in production, from an email provider's inbound-parse
+    webhook; here, from `./scripts/send_test_email.sh`). The endpoint validates it and
+    hands it to `run_workflow(email)` in `app/engine.py` — the function you implement.
+    """
     LOG.info(
         "Received email",
         extra={"from": email.from_, "to": email.to, "subject": email.subject},

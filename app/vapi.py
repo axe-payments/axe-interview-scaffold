@@ -4,8 +4,9 @@ This is the second "given" of the exercise: a single function, `make_call()`, th
 places an outbound phone call through Vapi. Your engine calls this when it decides a
 call should happen. You should not need to change anything in this file.
 
-Two agent / phone-number pairs are configured (see `.env`). `make_call` defaults to
-pair 1; pass `assistant_id` / `phone_number_id` explicitly to route to pair 2.
+Three agents and two phone numbers are configured (see `.env`, and the `GET /agents/` /
+`GET /phone-numbers/` discovery endpoints). `make_call` defaults to the first agent +
+first number; pass `assistant_id` / `phone_number_id` explicitly to choose another.
 """
 
 import logging
@@ -18,9 +19,21 @@ from app.config import settings
 
 LOG = logging.getLogger("app.vapi")
 
-VAPI_CALL_URL = "https://api.vapi.ai/call"
+VAPI_BASE_URL = "https://api.vapi.ai"
+VAPI_CALL_URL = f"{VAPI_BASE_URL}/call"
 
 router = APIRouter()
+
+
+async def vapi_get(path: str) -> dict:
+    """GET a Vapi resource (read-only). Used by the discovery endpoints in app/catalog.py."""
+    async with httpx.AsyncClient(timeout=30) as client:
+        response = await client.get(
+            f"{VAPI_BASE_URL}{path}",
+            headers={"Authorization": f"Bearer {settings.vapi_api_key}"},
+        )
+        response.raise_for_status()
+        return response.json()
 
 
 async def make_call(
@@ -36,7 +49,8 @@ async def make_call(
         target_number: who to call, E.164 (e.g. "+14155551234").
         variables: values exposed to the assistant's prompt as {{variable}} — e.g.
             {"order_number": "12345", "contact_name": "Alex"}.
-        assistant_id / phone_number_id: which agent to use. Defaults to pair 1.
+        assistant_id / phone_number_id: which agent to use. Defaults to the first
+            configured agent + phone number.
 
     Returns the Vapi call object (includes the call `id`).
     """
@@ -74,8 +88,21 @@ class DebugCallRequest(BaseModel):
     target_number: str
     variables: dict = {}
 
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "target_number": "+14155551234",
+                "variables": {"first_name": "Alex", "order_number": "ORD-12345"},
+            }
+        }
+    }
 
-@router.post("/debug/call/")
+
+@router.post(
+    "/debug/call/",
+    tags=["Make a call (exit point)"],
+    summary="Place a call directly (the EXIT POINT)",
+)
 async def debug_call(request: DebugCallRequest) -> dict:
     """Smoke test: place a call directly, bypassing the engine.
 

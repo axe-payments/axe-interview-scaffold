@@ -44,7 +44,17 @@ def _orders() -> dict[str, dict]:
     }
 
 
-@router.get("/orders/{order_id}/")
+@router.get("/orders/", tags=["Mock CRM"], summary="List all mock orders")
+async def list_orders() -> list[dict]:
+    """List every order in the mock CRM, so you can see what's available to look up.
+
+    (The special ids `ORD-ERROR` and `ORD-SLOW` are not listed — they exist only to let
+    you test error / slow-response handling against `GET /orders/{order_id}/`.)
+    """
+    return list(_orders().values())
+
+
+@router.get("/orders/{order_id}/", tags=["Mock CRM"], summary="Look up one order")
 async def get_order(order_id: str) -> dict:
     if order_id == "ORD-ERROR":
         raise HTTPException(status_code=500, detail="Simulated CRM failure")

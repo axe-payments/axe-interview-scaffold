@@ -48,6 +48,15 @@ curl localhost:8000/health
 curl localhost:8000/mock-crm/orders/ORD-12345/
 ```
 
+**See what's wired up** — the agents (and the `{{ variables }}` each expects) and the
+phone numbers you can call from. The best view is the docs at `http://localhost:8000/docs`,
+or from the terminal:
+
+```bash
+curl localhost:8000/agents/
+curl localhost:8000/phone-numbers/
+```
+
 **Send a test email** — this hits the inbound endpoint. Out of the box the engine just
 logs it (your job is to make it do more):
 
@@ -71,7 +80,8 @@ the app restarts automatically. The file you'll spend your time in is
 |------|------------|
 | `app/inbound.py` | **Given.** `POST /inbound/email/` — receives the email, hands it to `run_workflow()`. |
 | `app/vapi.py` | **Given.** `make_call(target_number=..., variables={...})` — places a call. |
-| `app/mock_crm.py` | **Given.** `GET /mock-crm/orders/{id}/` — fake "look up the order" API. |
+| `app/mock_crm.py` | **Given.** `GET /mock-crm/orders/` and `/{id}/` — fake "look up the order" API. |
+| `app/catalog.py` | **Given.** `GET /agents/` and `GET /phone-numbers/` — discover what's wired up. |
 | `app/engine.py` | **Yours.** `run_workflow(email)` — the engine you build. |
 | `app/models.py` | Optional. Add Tortoise models here; tables auto-create on restart. |
 | `app/config.py` / `app/main.py` | Config + app wiring. You shouldn't need to touch these. |
