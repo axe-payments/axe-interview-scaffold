@@ -67,7 +67,7 @@ logs it (your job is to make it do more):
 ```
 
 Watch the `docker compose up` terminal — you'll see the email arrive and `run_workflow`
-log its "TODO" line.
+log it.
 
 ## Your dev loop
 

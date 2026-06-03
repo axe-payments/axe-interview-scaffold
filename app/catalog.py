@@ -1,13 +1,4 @@
-"""Discovery endpoints — see what's wired up.
-
-These list the Vapi resources the scaffold is configured to use (the assistant and
-phone-number IDs hard-coded in `app/vapi.py`), fetched live from Vapi. Use them to
-discover which agents exist, what each one says, which `{{ variables }}` it expects, and
-which phone numbers you can place calls from.
-
-    GET /agents/          -> the AI agents you can call with
-    GET /phone-numbers/   -> the phone numbers you can call from
-"""
+"""Discovery endpoints: GET /agents/ and GET /phone-numbers/, fetched live from Vapi."""
 
 import asyncio
 import logging
@@ -31,11 +22,7 @@ class Agent(BaseModel):
     name: str
     model: str
     first_message: str
-    # The agent's system prompt. Multiline text, returned as a JSON string (newlines
-    # as \n). Read it in /docs, or `curl .../agents/ | python3 -m json.tool`.
     system_prompt: str
-    # The {{ merge_variables }} this agent's script expects — pass matching keys in
-    # make_call(variables=...).
     merge_variables: list[str]
 
 
@@ -69,12 +56,6 @@ def _to_agent(raw: dict) -> Agent:
     summary="List the available AI agents",
 )
 async def list_agents() -> list[Agent]:
-    """The AI phone agents you can call with, fetched live from Vapi.
-
-    For each agent you get its `name`, `system_prompt`, `first_message`, and
-    `merge_variables` — the `{{ variables }}` its script expects. Pass matching keys in
-    `make_call(variables=...)` so the agent can speak them.
-    """
     raws = await asyncio.gather(
         *(vapi_get(f"/assistant/{aid}") for aid in ASSISTANT_IDS),
         return_exceptions=True,
@@ -95,11 +76,6 @@ async def list_agents() -> list[Agent]:
     summary="List the available phone numbers",
 )
 async def list_phone_numbers() -> list[PhoneNumber]:
-    """The phone numbers you can place calls from, fetched live from Vapi.
-
-    Pass one of these `id` values as `phone_number_id` to `make_call(...)` to choose the
-    caller ID.
-    """
     raws = await asyncio.gather(
         *(vapi_get(f"/phone-number/{pid}") for pid in PHONE_NUMBER_IDS),
         return_exceptions=True,

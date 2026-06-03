@@ -1,17 +1,6 @@
-"""A tiny mock CRM.
+"""A tiny mock CRM. Look up an order at GET /mock-crm/orders/{order_id}/.
 
-Stands in for a real "look up the order" system. Your engine can call this over HTTP
-(it's just another local endpoint) to enrich an email with order details before
-deciding who to call and what to say.
-
-    GET /mock-crm/orders/{order_id}/
-
-Known order ids:
-    ORD-12345  -> a normal order whose contact_phone is a real phone, so a call against
-                  this order actually rings.
-    ORD-67890  -> a second normal order with a different real contact.
-    ORD-ERROR  -> always returns 500, for testing your error handling.
-    ORD-SLOW   -> responds after a delay, for testing timeouts/retries.
+Order ids: ORD-12345, ORD-67890 (normal), ORD-ERROR (returns 500), ORD-SLOW (delayed).
 """
 
 import asyncio
@@ -20,8 +9,7 @@ from fastapi import APIRouter, HTTPException
 
 router = APIRouter(prefix="/mock-crm")
 
-# Real phones the demo calls will ring (not secret — these are us). When an order below
-# is enriched and called, the matching person's phone rings.
+# Real phones the demo calls ring.
 DAN_PHONE_NUMBER = "+447790642883"
 CHRIS_PHONE_NUMBER = "+447460833116"
 
@@ -49,11 +37,7 @@ def _orders() -> dict[str, dict]:
 
 @router.get("/orders/", tags=["Mock CRM"], summary="List all mock orders")
 async def list_orders() -> list[dict]:
-    """List every order in the mock CRM, so you can see what's available to look up.
-
-    (The special ids `ORD-ERROR` and `ORD-SLOW` are not listed — they exist only to let
-    you test error / slow-response handling against `GET /orders/{order_id}/`.)
-    """
+    """List all orders. (ORD-ERROR and ORD-SLOW are not listed.)"""
     return list(_orders().values())
 
 
