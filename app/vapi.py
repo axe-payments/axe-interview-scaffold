@@ -1,13 +1,7 @@
-"""Outbound calling.
+"""Outbound calling: `make_call()` places a call through Vapi.
 
-This is the second "given" of the exercise: a single function, `make_call()`, that
-places an outbound phone call through Vapi. Your engine calls this when it decides a
-call should happen. You should not need to change anything in this file.
-
-Three agents and two phone numbers are pre-configured. Their IDs are hard-coded below —
-they aren't secret; only the Vapi API key lives in `.env`. Discover them at runtime via
-the `GET /agents/` / `GET /phone-numbers/` endpoints. `make_call` defaults to the first
-agent + first number; pass `assistant_id` / `phone_number_id` explicitly to choose another.
+The assistant and phone-number IDs are hard-coded below (not secret); only the Vapi API
+key comes from `.env`.
 """
 
 import logging
@@ -23,24 +17,22 @@ LOG = logging.getLogger("app.vapi")
 VAPI_BASE_URL = "https://api.vapi.ai"
 VAPI_CALL_URL = f"{VAPI_BASE_URL}/call"
 
-# --- Pre-configured Vapi resources (not secret — safe to hard-code) ---
-# The three AI agents you can call with. Inspect them at GET /agents/.
+# Pre-configured Vapi resources (not secret). Discover them at runtime via GET /agents/
+# and GET /phone-numbers/.
 ASSISTANT_IDS = [
-    "1fd811c3-2e8d-448e-a6de-3de998a8dde6",  # Delivery Completed (Driver)
-    "7075ec6d-9d1d-4716-8943-018d3dfe9b09",  # Delivery Completed (Customer)
-    "38928c55-c209-4dc1-b479-a7ea86b9821d",  # Delivery Delay (Customer)
+    "1fd811c3-2e8d-448e-a6de-3de998a8dde6",
+    "7075ec6d-9d1d-4716-8943-018d3dfe9b09",
+    "38928c55-c209-4dc1-b479-a7ea86b9821d",
 ]
-# The phone numbers you can place calls from. Inspect them at GET /phone-numbers/.
 PHONE_NUMBER_IDS = [
-    "d7c73608-369e-4e2a-915b-4fb5dfb886c0",  # +447428717968
-    "e4699fab-7660-48af-a7cd-c7381633e496",  # +441290438347
+    "d7c73608-369e-4e2a-915b-4fb5dfb886c0",
+    "e4699fab-7660-48af-a7cd-c7381633e496",
 ]
 
 router = APIRouter()
 
 
 async def vapi_get(path: str) -> dict:
-    """GET a Vapi resource (read-only). Used by the discovery endpoints in app/catalog.py."""
     async with httpx.AsyncClient(timeout=30) as client:
         response = await client.get(
             f"{VAPI_BASE_URL}{path}",
@@ -57,16 +49,9 @@ async def make_call(
     assistant_id: str | None = None,
     phone_number_id: str | None = None,
 ) -> dict:
-    """Place an outbound call.
+    """Place an outbound call; `variables` fill the agent's prompt {{ placeholders }}.
 
-    Args:
-        target_number: who to call, E.164 (e.g. "+14155551234").
-        variables: values exposed to the assistant's prompt as {{variable}} — e.g.
-            {"order_number": "12345", "contact_name": "Alex"}.
-        assistant_id / phone_number_id: which agent to use. Defaults to the first
-            configured agent + phone number (see ASSISTANT_IDS / PHONE_NUMBER_IDS).
-
-    Returns the Vapi call object (includes the call `id`).
+    Defaults to the first configured agent + phone number. Returns the Vapi call object.
     """
     assistant_id = assistant_id or ASSISTANT_IDS[0]
     phone_number_id = phone_number_id or PHONE_NUMBER_IDS[0]
@@ -97,13 +82,6 @@ async def make_call(
 
 
 class DebugCallRequest(BaseModel):
-    """Body for the smoke-test endpoint.
-
-    You choose which agent and which number to call from — there are no defaults.
-    Look them up via the discovery endpoints: `assistant_id` from `GET /agents/`
-    and `phone_number_id` from `GET /phone-numbers/`.
-    """
-
     target_number: str
     assistant_id: str
     phone_number_id: str
@@ -127,16 +105,7 @@ class DebugCallRequest(BaseModel):
     summary="Place a call directly (the EXIT POINT)",
 )
 async def debug_call(request: DebugCallRequest) -> dict:
-    """Smoke test: place a call directly, bypassing the engine.
-
-    Use this to confirm your Vapi credentials work before you start building
-    (`./scripts/test_call.sh`). It's also a worked example of calling `make_call`:
-    you pick the agent (`assistant_id`) and the number to call from
-    (`phone_number_id`) yourself — see `GET /agents/` and `GET /phone-numbers/`.
-
-    Reports a readable error (Vapi's status + body) instead of a 500 so credential
-    problems are obvious.
-    """
+    """Place a call directly, bypassing the engine."""
     try:
         call = await make_call(
             target_number=request.target_number,
