@@ -39,8 +39,7 @@ curl localhost:8000/health
 
 ```bash
 ./scripts/test_call.sh
-# you'll be asked for: the phone to call (E.164, e.g. +14155551234), an assistant ID
-# (from GET /agents/), and a phone number ID (from GET /phone-numbers/)
+# enter the phone number to call when prompted (E.164, e.g. +14155551234)
 ```
 
 **Look up an order** in the mock CRM:

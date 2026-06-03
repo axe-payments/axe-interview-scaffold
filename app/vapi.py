@@ -82,17 +82,17 @@ async def make_call(
 
 
 class DebugCallRequest(BaseModel):
+    # assistant_id / phone_number_id default to the first configured agent + number
+    # (see ASSISTANT_IDS / PHONE_NUMBER_IDS); pass them to choose another.
     target_number: str
-    assistant_id: str
-    phone_number_id: str
+    assistant_id: str | None = None
+    phone_number_id: str | None = None
     variables: dict = {}
 
     model_config = {
         "json_schema_extra": {
             "example": {
                 "target_number": "+14155551234",
-                "assistant_id": "<an assistant id from GET /agents/>",
-                "phone_number_id": "<a phone number id from GET /phone-numbers/>",
                 "variables": {"first_name": "Alex", "order_number": "ORD-12345"},
             }
         }
