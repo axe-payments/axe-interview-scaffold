@@ -45,17 +45,14 @@ async def vapi_get(path: str) -> dict:
 async def make_call(
     *,
     target_number: str,
+    assistant_id: str,
+    phone_number_id: str,
     variables: dict | None = None,
-    assistant_id: str | None = None,
-    phone_number_id: str | None = None,
 ) -> dict:
     """Place an outbound call; `variables` fill the agent's prompt {{ placeholders }}.
 
-    Defaults to the first configured agent + phone number. Returns the Vapi call object.
+    Returns the Vapi call object.
     """
-    assistant_id = assistant_id or ASSISTANT_IDS[0]
-    phone_number_id = phone_number_id or PHONE_NUMBER_IDS[0]
-
     payload = {
         "assistantId": assistant_id,
         "phoneNumberId": phone_number_id,
@@ -82,17 +79,17 @@ async def make_call(
 
 
 class DebugCallRequest(BaseModel):
-    # assistant_id / phone_number_id default to the first configured agent + number
-    # (see ASSISTANT_IDS / PHONE_NUMBER_IDS); pass them to choose another.
     target_number: str
-    assistant_id: str | None = None
-    phone_number_id: str | None = None
+    assistant_id: str
+    phone_number_id: str
     variables: dict = {}
 
     model_config = {
         "json_schema_extra": {
             "example": {
                 "target_number": "+14155551234",
+                "assistant_id": "<an assistant id from GET /agents/>",
+                "phone_number_id": "<a phone number id from GET /phone-numbers/>",
                 "variables": {"first_name": "Alex", "order_number": "ORD-12345"},
             }
         }
