@@ -13,9 +13,6 @@ Example (delete or replace):
     from tortoise import fields
     from tortoise.models import Model
 
-    class WorkflowRun(Model):
+    class ExampleModel(Model):
         id = fields.UUIDField(pk=True)
-        email_subject = fields.CharField(max_length=255)
-        status = fields.CharField(max_length=32, default="pending")
-        created_at = fields.DatetimeField(auto_now_add=True)
 """

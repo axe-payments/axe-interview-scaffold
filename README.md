@@ -15,9 +15,9 @@ That's it — no Python, Postgres, or anything else installed on your machine.
 ## Setup
 
 ```bash
-# 1. Create your env file and fill in the values you were given.
+# 1. Create your env file and paste in the Vapi API key you were given.
 cp .env.example .env
-#    Open .env and paste in the Vapi credentials, and set DEMO_TARGET_PHONE to YOUR phone.
+#    Open .env and set VAPI_API_KEY. That's the only value you need.
 
 # 2. Boot everything (app + database). First run builds the image (~1-2 min).
 docker compose up
@@ -39,7 +39,8 @@ curl localhost:8000/health
 
 ```bash
 ./scripts/test_call.sh
-# enter your phone number when prompted (E.164, e.g. +14155551234)
+# you'll be asked for: the phone to call (E.164, e.g. +14155551234), an assistant ID
+# (from GET /agents/), and a phone number ID (from GET /phone-numbers/)
 ```
 
 **Look up an order** in the mock CRM:

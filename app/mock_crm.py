@@ -7,9 +7,9 @@ deciding who to call and what to say.
     GET /mock-crm/orders/{order_id}/
 
 Known order ids:
-    ORD-12345  -> a normal order. Its contact_phone is DEMO_TARGET_PHONE (your phone),
-                  so a call against this order rings you.
-    ORD-67890  -> a second normal order (different contact, no real phone).
+    ORD-12345  -> a normal order whose contact_phone is a real phone, so a call against
+                  this order actually rings.
+    ORD-67890  -> a second normal order with a different real contact.
     ORD-ERROR  -> always returns 500, for testing your error handling.
     ORD-SLOW   -> responds after a delay, for testing timeouts/retries.
 """
@@ -18,25 +18,28 @@ import asyncio
 
 from fastapi import APIRouter, HTTPException
 
-from app.config import settings
-
 router = APIRouter(prefix="/mock-crm")
+
+# Real phones the demo calls will ring (not secret — these are us). When an order below
+# is enriched and called, the matching person's phone rings.
+DAN_PHONE_NUMBER = "+447790642883"
+CHRIS_PHONE_NUMBER = "+447460833116"
 
 
 def _orders() -> dict[str, dict]:
     return {
         "ORD-12345": {
             "order_id": "ORD-12345",
-            "contact_name": "Alex Morgan",
-            "contact_phone": settings.demo_target_phone,
+            "contact_name": "Dan",
+            "contact_phone": DAN_PHONE_NUMBER,
             "status": "Out for delivery",
             "delivery_window": "Today, 2pm-4pm",
             "address": "742 Evergreen Terrace, Springfield",
         },
         "ORD-67890": {
             "order_id": "ORD-67890",
-            "contact_name": "Jordan Lee",
-            "contact_phone": "+15555550123",
+            "contact_name": "Chris",
+            "contact_phone": CHRIS_PHONE_NUMBER,
             "status": "Delayed",
             "delivery_window": "Tomorrow, 9am-12pm",
             "address": "31 Spooner Street, Quahog",

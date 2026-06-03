@@ -1,9 +1,9 @@
 """Discovery endpoints — see what's wired up.
 
 These list the Vapi resources the scaffold is configured to use (the assistant and
-phone-number IDs from your `.env`), fetched live from Vapi. Use them to discover which
-agents exist, what each one says, which `{{ variables }}` it expects, and which phone
-numbers you can place calls from.
+phone-number IDs hard-coded in `app/vapi.py`), fetched live from Vapi. Use them to
+discover which agents exist, what each one says, which `{{ variables }}` it expects, and
+which phone numbers you can place calls from.
 
     GET /agents/          -> the AI agents you can call with
     GET /phone-numbers/   -> the phone numbers you can call from
@@ -16,8 +16,7 @@ import re
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from app.config import settings
-from app.vapi import vapi_get
+from app.vapi import ASSISTANT_IDS, PHONE_NUMBER_IDS, vapi_get
 
 LOG = logging.getLogger("app.catalog")
 
@@ -77,11 +76,11 @@ async def list_agents() -> list[Agent]:
     `make_call(variables=...)` so the agent can speak them.
     """
     raws = await asyncio.gather(
-        *(vapi_get(f"/assistant/{aid}") for aid in settings.assistant_ids),
+        *(vapi_get(f"/assistant/{aid}") for aid in ASSISTANT_IDS),
         return_exceptions=True,
     )
     agents: list[Agent] = []
-    for aid, raw in zip(settings.assistant_ids, raws):
+    for aid, raw in zip(ASSISTANT_IDS, raws):
         if isinstance(raw, Exception):
             LOG.warning("Could not fetch agent", extra={"assistant_id": aid, "error": str(raw)})
             continue
@@ -102,11 +101,11 @@ async def list_phone_numbers() -> list[PhoneNumber]:
     caller ID.
     """
     raws = await asyncio.gather(
-        *(vapi_get(f"/phone-number/{pid}") for pid in settings.phone_number_ids),
+        *(vapi_get(f"/phone-number/{pid}") for pid in PHONE_NUMBER_IDS),
         return_exceptions=True,
     )
     numbers: list[PhoneNumber] = []
-    for pid, raw in zip(settings.phone_number_ids, raws):
+    for pid, raw in zip(PHONE_NUMBER_IDS, raws):
         if isinstance(raw, Exception):
             LOG.warning(
                 "Could not fetch phone number", extra={"phone_number_id": pid, "error": str(raw)}
