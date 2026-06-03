@@ -16,15 +16,16 @@ class InboundEmail(BaseModel):
     """A received email. `from_` is aliased to the JSON key `from` (a Python keyword)."""
 
     from_: str = Field(alias="from")
+    to: str
     subject: str
     body: str
-    to: str = "orders@interview.test"
 
     model_config = {
         "populate_by_name": True,
         "json_schema_extra": {
             "example": {
                 "from": "dispatch@partner.com",
+                "to": "orders@interview.test",
                 "subject": "Delivery update ORD-12345",
                 "body": "Order ORD-12345 is out for delivery today.",
             }

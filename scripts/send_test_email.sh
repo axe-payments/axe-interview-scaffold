@@ -3,7 +3,7 @@
 # Inject a test email into the running app, simulating an inbound email.
 #
 # Interactive:   ./scripts/send_test_email.sh
-# With args:     ./scripts/send_test_email.sh "dispatch@partner.com" "Delivery update ORD-12345" "Order ORD-12345 is out for delivery."
+# With args:     ./scripts/send_test_email.sh "dispatch@partner.com" "orders@interview.test" "Delivery update ORD-12345" "Order ORD-12345 is out for delivery."
 #
 # Only needs bash + curl. Talks to the app on localhost:8000.
 
@@ -12,10 +12,12 @@ set -euo pipefail
 URL="${URL:-http://localhost:8000/inbound/email/}"
 
 FROM="${1:-}"
-SUBJECT="${2:-}"
-BODY="${3:-}"
+TO="${2:-}"
+SUBJECT="${3:-}"
+BODY="${4:-}"
 
 [ -z "$FROM" ] && read -r -p "From:    " FROM
+[ -z "$TO" ] && read -r -p "To:      " TO
 [ -z "$SUBJECT" ] && read -r -p "Subject: " SUBJECT
 [ -z "$BODY" ] && read -r -p "Body:    " BODY
 
@@ -29,8 +31,8 @@ json_escape() {
   printf '%s' "$s"
 }
 
-PAYLOAD=$(printf '{"from":"%s","subject":"%s","body":"%s"}' \
-  "$(json_escape "$FROM")" "$(json_escape "$SUBJECT")" "$(json_escape "$BODY")")
+PAYLOAD=$(printf '{"from":"%s","to":"%s","subject":"%s","body":"%s"}' \
+  "$(json_escape "$FROM")" "$(json_escape "$TO")" "$(json_escape "$SUBJECT")" "$(json_escape "$BODY")")
 
 echo "POST $URL"
 echo "  $PAYLOAD"

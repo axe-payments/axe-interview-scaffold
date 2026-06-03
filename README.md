@@ -62,7 +62,7 @@ logs it (your job is to make it do more):
 
 ```bash
 ./scripts/send_test_email.sh
-# enter From / Subject / Body when prompted
+# enter From / To / Subject / Body when prompted
 ```
 
 Watch the `docker compose up` terminal — you'll see the email arrive and `run_workflow`
