@@ -1,0 +1,6 @@
+# Editor/dev tooling ONLY — not needed to run the app (that runs in Docker).
+# scripts/setup_venv.sh installs these into a local .venv so Cursor/VSCode can resolve
+# imports and lint. Includes the app deps so autocomplete works for fastapi, pydantic, etc.
+-r requirements.txt
+
+ruff>=0.6

@@ -20,5 +20,13 @@ class Settings(BaseSettings):
     # `postgres` service in docker-compose; override only if running outside Docker.
     database_url: str = "postgres://postgres:postgres@postgres:5432/interview"
 
+    # --- Transcript callback (optional) ---
+    # So Vapi can POST the call transcript back to us, the app needs a public URL. The
+    # `ngrok` service in docker-compose tunnels to us automatically; we discover the random
+    # tunnel URL from ngrok's local API. Set `public_base_url` to skip discovery and force a
+    # URL (e.g. a reserved ngrok domain); leave it blank to auto-discover.
+    public_base_url: str = ""
+    ngrok_api_url: str = "http://ngrok:4040/api/tunnels"
+
 
 settings = Settings()

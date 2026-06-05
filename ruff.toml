@@ -1,0 +1,8 @@
+# Lint/format config for the editor (and `ruff check` / `ruff format`). Line length matches
+# the existing code so ruff doesn't fight the current style.
+line-length = 100
+target-version = "py312"
+
+[lint]
+# A small, sensible default set: pyflakes (F), pycodestyle (E/W), isort (I).
+select = ["E", "F", "W", "I"]
