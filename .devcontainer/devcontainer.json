@@ -1,0 +1,24 @@
+{
+  // Open the repo in the running app container so Cursor/VSCode use the in-container Python
+  // (with all deps already installed) — gives you import resolution, auto-import, and lint
+  // with no local Python needed. In Cursor/VSCode: "Dev Containers: Reopen in Container".
+  "name": "Axe Interview Scaffold",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/code",
+  "shutdownAction": "stopCompose",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.analysis.autoImportCompletions": true,
+        "python.analysis.typeCheckingMode": "basic"
+      }
+    }
+  }
+}

@@ -23,6 +23,8 @@ def _orders() -> dict[str, dict]:
             "status": "Out for delivery",
             "delivery_window": "Today, 2pm-4pm",
             "address": "742 Evergreen Terrace, Springfield",
+            "driver_name": "Marcus",
+            "driver_phone": "+15551230001",
         },
         "ORD-67890": {
             "order_id": "ORD-67890",
@@ -31,6 +33,8 @@ def _orders() -> dict[str, dict]:
             "status": "Delayed",
             "delivery_window": "Tomorrow, 9am-12pm",
             "address": "31 Spooner Street, Quahog",
+            "driver_name": "Priya",
+            "driver_phone": "+15551230002",
         },
     }
 

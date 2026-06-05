@@ -11,6 +11,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from app.config import settings
+from app.tunnel import public_base_url
 
 LOG = logging.getLogger("app.vapi")
 
@@ -53,16 +54,29 @@ async def make_call(
 
     Returns the Vapi call object.
     """
+    overrides: dict = {"variableValues": variables or {}}
+
+    # If we have a public URL (via ngrok), ask Vapi to POST the end-of-call transcript back
+    # to our webhook so it's pretty-printed in the logs. No URL -> no callback, call as before.
+    base_url = await public_base_url()
+    if base_url:
+        overrides["server"] = {"url": f"{base_url}/webhooks/vapi/"}
+        overrides["serverMessages"] = ["end-of-call-report"]
+
     payload = {
         "assistantId": assistant_id,
         "phoneNumberId": phone_number_id,
         "customer": {"number": target_number},
-        "assistantOverrides": {"variableValues": variables or {}},
+        "assistantOverrides": overrides,
     }
 
     LOG.info(
         "Placing outbound call",
-        extra={"target": target_number, "assistant_id": assistant_id},
+        extra={
+            "target": target_number,
+            "assistant_id": assistant_id,
+            "transcript_callback": base_url is not None,
+        },
     )
 
     async with httpx.AsyncClient(timeout=30) as client:
